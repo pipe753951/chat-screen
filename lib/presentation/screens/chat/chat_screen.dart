@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:yes_no_app/domain/entities/message.dart';
 
 import 'package:yes_no_app/presentation/providers/chat_provider.dart';
-import 'package:yes_no_app/presentation/screens/shared/message_field_box.dart';
+import 'package:yes_no_app/presentation/screens/shared/message_field.dart';
 import 'package:yes_no_app/presentation/widgets/chat/first_person_message_bubble.dart';
 import 'package:yes_no_app/presentation/widgets/chat/second_person_message_bubble.dart';
 
@@ -12,6 +13,8 @@ class ChatScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final ColorScheme colorScheme = Theme.of(context).colorScheme;
+
     return Scaffold(
       appBar: AppBar(
         leading: const Padding(
@@ -24,6 +27,10 @@ class ChatScreen extends StatelessWidget {
           ),
         ),
         title: const Text('Usuario'),
+        systemOverlayStyle: SystemUiOverlayStyle(
+          systemNavigationBarColor: colorScheme.surface,
+          systemNavigationBarIconBrightness: Brightness.light
+        ),
       ),
       body: _ChatView(),
     );
@@ -57,7 +64,7 @@ class _ChatView extends StatelessWidget {
             ),
 
             // Caja de texto de mensajes
-            MessageFieldBox(
+            MessageField(
               // onValue: (value) => chatProvider.sendMessage(value),
               onValue: chatProvider.sendMessage,
             ),
