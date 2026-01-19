@@ -14,6 +14,12 @@ class ChatScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
+    SystemChrome.setSystemUIOverlayStyle(
+      SystemUiOverlayStyle(
+        systemNavigationBarColor: colorScheme.surface,
+        systemNavigationBarIconBrightness: Brightness.dark,
+      ),
+    );
 
     return Scaffold(
       appBar: AppBar(
@@ -27,11 +33,6 @@ class ChatScreen extends StatelessWidget {
           ),
         ),
         title: const Text('Usuario'),
-        systemOverlayStyle: SystemUiOverlayStyle(
-          statusBarColor: colorScheme.surface,
-          systemNavigationBarColor: colorScheme.surface,
-          systemNavigationBarIconBrightness: Brightness.dark
-        ),
       ),
       body: _ChatView(),
     );
@@ -44,31 +45,31 @@ class _ChatView extends StatelessWidget {
     final chatProvider = context.watch<ChatProvider>();
 
     return SafeArea(
-      // left: false,
-      // right: false,
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 10),
         child: Column(
           children: [
             Expanded(
-              child: ListView.builder(
-                controller: chatProvider.chatScrollController,
-                itemCount: chatProvider.messageList.length,
-                itemBuilder: (context, index) {
-                  final message = chatProvider.messageList[index];
+              child: ClipRRect(
+                borderRadius: const BorderRadius.vertical(
+                  bottom: Radius.circular(20),
+                ),
+                child: ListView.builder(
+                  controller: chatProvider.chatScrollController,
+                  itemCount: chatProvider.messageList.length,
+                  itemBuilder: (context, index) {
+                    final message = chatProvider.messageList[index];
 
-                  return message.fromWho == FromWho.other
-                      ? SecondPersonMessageBubble(message: message)
-                      : FirstPersonMessageBubble(message: message);
-                },
+                    return message.fromWho == FromWho.other
+                        ? SecondPersonMessageBubble(message: message)
+                        : FirstPersonMessageBubble(message: message);
+                  },
+                ),
               ),
             ),
 
             // Caja de texto de mensajes
-            MessageField(
-              // onValue: (value) => chatProvider.sendMessage(value),
-              onValue: chatProvider.sendMessage,
-            ),
+            MessageField(onValue: chatProvider.sendMessage),
           ],
         ),
       ),
