@@ -28,8 +28,9 @@ class ChatScreen extends StatelessWidget {
         ),
         title: const Text('Usuario'),
         systemOverlayStyle: SystemUiOverlayStyle(
+          statusBarColor: colorScheme.surface,
           systemNavigationBarColor: colorScheme.surface,
-          systemNavigationBarIconBrightness: Brightness.light
+          systemNavigationBarIconBrightness: Brightness.dark
         ),
       ),
       body: _ChatView(),
