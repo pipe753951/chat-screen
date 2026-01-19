@@ -8,7 +8,7 @@ class ChatProvider extends ChangeNotifier {
 
   List<Message> messageList = [
     Message(text: 'Hola Mundo', fromWho: FromWho.me),
-    Message(text: 'Si o no?', fromWho: FromWho.me),
+    Message(text: 'Estás bien?', fromWho: FromWho.me),
   ];
 
   Future<void> sendMessage(String text) async {
@@ -19,6 +19,7 @@ class ChatProvider extends ChangeNotifier {
 
     if (text.endsWith('?')) {
       secondPersonReply();
+      return;
     }
 
     notifyListeners();
