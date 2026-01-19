@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:yes_no_app/presentation/providers/message_field_provider.dart';
 
 class MessageField extends StatelessWidget {
   final ValueChanged<String> onValue;
@@ -7,37 +9,34 @@ class MessageField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final textController = TextEditingController();
-    final FocusNode focusNode = FocusNode();
-
-    return Row(
-      spacing: 8,
-      children: [
-        Expanded(
-          child: MessageFieldBox(
-            focusNode: focusNode,
-            textController: textController,
-            onValue: onValue,
-          ),
+    return ChangeNotifierProvider(
+      create: (_) => MessageFieldProvider(),
+      child: Padding(
+        padding: const EdgeInsetsGeometry.symmetric(vertical: 8),
+        child: Row(
+          spacing: 8,
+          children: [
+            Expanded(child: MessageFieldBox(onValue: onValue)),
+            _MessageButton(onValue: onValue),
+          ],
         ),
-        _MessageButton(textController: textController, onValue: onValue),
-      ],
+      ),
     );
   }
 }
 
 class _MessageButton extends StatelessWidget {
-  const _MessageButton({
-    required this.textController,
-    required this.onValue,
-  });
+  const _MessageButton({required this.onValue});
 
-  final TextEditingController textController;
   final ValueChanged<String> onValue;
 
   @override
   Widget build(BuildContext context) {
-    final ColorScheme colorScheme = Theme.of(context).colorScheme;
+    final MessageFieldProvider messageFieldProvider = context
+        .watch<MessageFieldProvider>();
+    final TextEditingController textController =
+        messageFieldProvider.textController;
+
     return SizedBox.square(
       dimension: 50,
       child: IconButton.filled(
@@ -46,38 +45,60 @@ class _MessageButton extends StatelessWidget {
           textController.clear();
           onValue(textValue);
         },
-        // icon: Icon(Icons.keyboard_voice),
-        icon: Icon(Icons.send_rounded),
+        icon: (textController.value == TextEditingValue.empty)
+            ? Icon(Icons.keyboard_voice)
+            : Icon(Icons.send_rounded),
       ),
     );
   }
 }
 
 class MessageFieldBox extends StatelessWidget {
-  final FocusNode focusNode;
-  final TextEditingController textController;
   final ValueChanged<String> onValue;
 
-  const MessageFieldBox({
-    super.key,
-    required this.focusNode,
-    required this.textController,
-    required this.onValue,
-  });
+  const MessageFieldBox({super.key, required this.onValue});
 
   @override
   Widget build(BuildContext context) {
+    final ColorScheme colorScheme = Theme.of(context).colorScheme;
+    final BoxDecoration boxDecoration = BoxDecoration(
+      borderRadius: BorderRadius.circular(25),
+      color: colorScheme.surfaceContainerHighest,
+    );
+
+    return SizedBox(
+      height: 50,
+      child: DecoratedBox(
+        decoration: boxDecoration,
+        child: Center(child: TextMessageField(onValue: onValue)),
+      ),
+    );
+  }
+}
+
+class TextMessageField extends StatelessWidget {
+  final ValueChanged<String> onValue;
+
+  const TextMessageField({super.key, required this.onValue});
+
+  @override
+  Widget build(BuildContext context) {
+    final MessageFieldProvider messageFieldProvider = context
+        .watch<MessageFieldProvider>();
+    final TextEditingController textController =
+        messageFieldProvider.textController;
+    final FocusNode focusNode = messageFieldProvider.focusNode;
+
     final outlineInputBorder = UnderlineInputBorder(
       borderSide: const BorderSide(color: Colors.transparent),
       borderRadius: BorderRadius.circular(50),
     );
 
     final inputDecoration = InputDecoration(
-      contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 13),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 15),
       hintText: 'Message',
       enabledBorder: outlineInputBorder,
       focusedBorder: outlineInputBorder,
-      filled: true,
     );
 
     return TextFormField(
