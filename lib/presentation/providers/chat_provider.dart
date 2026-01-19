@@ -1,38 +1,44 @@
 import 'package:flutter/material.dart';
-import 'package:yes_no_app/config/helpers/get_yes_no_answer.dart';
-import 'package:yes_no_app/domain/entities/message.dart';
+
+import 'package:yes_no_app/domain/domain.dart';
+import 'package:yes_no_app/infrastructure/infrastructure.dart';
 
 class ChatProvider extends ChangeNotifier {
   final ScrollController chatScrollController = ScrollController();
-  final GetYesNoAnswer getYesNoAnswer = GetYesNoAnswer();
+  final ChatRepositoryImplementation chatRepository =
+      ChatRepositoryImplementation(chatDatasource: YesNoMessageDatasource());
 
   List<Message> messageList = [
     Message(text: 'Hola Mundo', fromWho: FromWho.me),
     Message(text: 'Estás bien?', fromWho: FromWho.me),
   ];
 
-  Future<void> sendMessage(String text) async {
-    if (text.isEmpty) return;
-
+  Message addNewMessage(String text) {
+    // Add message to local list.
     final newMessage = Message(text: text, fromWho: FromWho.me);
     messageList.add(newMessage);
 
-    if (text.endsWith('?')) {
-      secondPersonReply();
-      return;
-    }
-
+    // Update state.
     notifyListeners();
     moveScrollToBottom();
+
+    // Return new local message.
+    return newMessage;
   }
 
-  Future<void> secondPersonReply() async {
-    final secondPersonMessage = await getYesNoAnswer.getAnswer();
+  Future<void> sendMessage(String text) async {
+    if (text.isEmpty) return;
 
-    messageList.add(secondPersonMessage);
-    notifyListeners();
+    // Add message to state before sending it to repository.
+    final Message newMessage = addNewMessage(text);
 
-    moveScrollToBottom();
+    // Send message to repository and save response to a variable
+    final Message? response = await chatRepository.processMesage(newMessage);
+    if (response != null) {
+      messageList.add(response);
+      notifyListeners();
+      moveScrollToBottom();
+    }
   }
 
   Future<void> moveScrollToBottom() async {
