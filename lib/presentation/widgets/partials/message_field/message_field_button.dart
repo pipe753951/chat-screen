@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 
-import 'package:yes_no_app/presentation/providers/message_field_provider.dart';
+import 'package:yes_no_app/presentation/providers/providers.dart';
 
 class MessageFieldButton extends StatelessWidget {
   const MessageFieldButton({super.key, required this.onValue});
@@ -9,10 +10,6 @@ class MessageFieldButton extends StatelessWidget {
   final ValueChanged<String> onValue;
 
   void openPermissionDeniedDialog(BuildContext context) {
-    final openApplicationSettings = context
-        .read<MessageFieldProvider>()
-        .openApplicationSettings;
-
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -23,7 +20,7 @@ class MessageFieldButton extends StatelessWidget {
         actions: [
           TextButton(
             onPressed: () {
-              openApplicationSettings();
+              openAppSettings();
               Navigator.pop(context);
             },
             child: const Text('Ajustes'),
@@ -39,54 +36,69 @@ class MessageFieldButton extends StatelessWidget {
     );
   }
 
+  void onTap(BuildContext context) {
+    final ChatInputProvider messageFieldProvider = context
+        .read<ChatInputProvider>();
+
+    // If there is any text, send message
+    if (!messageFieldProvider.isTextFieldEmpty) {
+      final String textFormFieldText = messageFieldProvider.textController.text;
+      messageFieldProvider.onFieldSubmitted(textFormFieldText);
+    }
+    // TODO: Start recording by tap button
+  }
+
+  void onLongPress(BuildContext context) {
+    final ChatInputProvider messageFieldProvider = context
+        .read<ChatInputProvider>();
+    final VoiceMessageProvider voiceMessageProvider = context
+        .read<VoiceMessageProvider>();
+
+    // If there isn't any text, start recording.
+    if (messageFieldProvider.isTextFieldEmpty) {
+      try {
+        voiceMessageProvider.startRecording(
+          callOnPermissionDenied: () {
+            openPermissionDeniedDialog(context);
+          },
+        );
+      } catch (e) {
+        print('Hubo un error');
+      }
+    }
+  }
+
+  void onLongPressUp(BuildContext context) {
+    // Access provider
+    final VoiceMessageProvider voiceMessageProvider = context
+        .read<VoiceMessageProvider>();
+
+    // Stop recording
+    voiceMessageProvider.stopRecording();
+  }
+
   @override
   Widget build(BuildContext context) {
-    final MessageFieldProvider messageFieldProvider = context
-        .watch<MessageFieldProvider>();
+    final VoiceMessageProvider voiceMessageProvider = context
+        .watch<VoiceMessageProvider>();
 
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
 
     return SizedBox.square(
       dimension: 50,
       child: AnimatedScale(
-        scale: messageFieldProvider.isRecording ? 2 : 1.0,
+        scale: voiceMessageProvider.isRecording ? 2 : 1.0,
         duration: const Duration(milliseconds: 150),
         child: Material(
           borderRadius: BorderRadius.circular(25),
           color: colorScheme.primary,
           child: InkWell(
             borderRadius: BorderRadius.circular(25),
-            child: _MessageButtonIcon(),
 
-            onTap: () {
-              // If there is any text, send message
-              if (!messageFieldProvider.isTextFieldEmpty) {
-                final String textFormFieldText =
-                    messageFieldProvider.textController.text;
-                messageFieldProvider.onFieldSubmitted(textFormFieldText);
-              }
-              // TODO: Start recording by tap button
-            },
-            onLongPress: () {
-              // If there isn't any text, start recording.
-              if (messageFieldProvider.isTextFieldEmpty) {
-                try {
-                  messageFieldProvider.startRecording(
-                    callOnPermissionDenied: () {
-                      openPermissionDeniedDialog(context);
-                    },
-                  );
-                } catch (e) {
-                  print('Hubo un error');
-                }
-              }
-            },
-            onLongPressUp: () {
-              // If there isn't any text, stop.
-              if (messageFieldProvider.isTextFieldEmpty) {
-                messageFieldProvider.stopRecording();
-              }
-            },
+            onTap: () => onTap(context),
+            onLongPress: () => onLongPress(context),
+            onLongPressUp: () => onLongPressUp(context),
+            child: _MessageButtonIcon(),
           ),
         ),
       ),
@@ -99,8 +111,8 @@ class _MessageButtonIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final MessageFieldProvider messageFieldProvider = context
-        .watch<MessageFieldProvider>();
+    final ChatInputProvider messageFieldProvider = context
+        .watch<ChatInputProvider>();
 
     return AnimatedSwitcher(
       duration: const Duration(milliseconds: 150),

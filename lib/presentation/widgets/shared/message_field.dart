@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import 'package:yes_no_app/presentation/providers/message_field_provider.dart';
+import 'package:yes_no_app/presentation/providers/providers.dart';
 import 'package:yes_no_app/presentation/widgets/widgets.dart';
 
 class MessageField extends StatelessWidget {
@@ -11,8 +11,11 @@ class MessageField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (_) => MessageFieldProvider(onValue),
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => ChatInputProvider(onValue)),
+        ChangeNotifierProvider(create: (_) => VoiceMessageProvider())
+      ],
       child: Padding(
         padding: const EdgeInsetsGeometry.symmetric(vertical: 8),
         child: Stack(
@@ -39,8 +42,8 @@ class MessageFieldBox extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final MessageFieldProvider messageFieldProvider = context
-        .watch<MessageFieldProvider>();
+    final VoiceMessageProvider voiceMessageProvider = context
+        .watch<VoiceMessageProvider>();
 
     // App color scheme
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
@@ -63,7 +66,7 @@ class MessageFieldBox extends StatelessWidget {
             return FadeTransition(opacity: animation, child: child);
           },
           // Field content (text field / recording status)
-          child: messageFieldProvider.isRecording
+          child: voiceMessageProvider.isRecording
               ? VoiceMessageRecordingStatus()
               : TextMessageField(),
         ),

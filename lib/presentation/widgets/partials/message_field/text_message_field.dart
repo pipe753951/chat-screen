@@ -8,8 +8,8 @@ class TextMessageField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final MessageFieldProvider messageFieldProvider = context
-        .watch<MessageFieldProvider>();
+    final ChatInputProvider messageFieldProvider = context
+        .watch<ChatInputProvider>();
 
     final UnderlineInputBorder outlineInputBorder = UnderlineInputBorder(
       borderSide: const BorderSide(color: Colors.transparent),

@@ -1,66 +1,29 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
-
 import 'package:record/record.dart';
+
 import 'package:yes_no_app/infrastructure/exceptions/exceptions.dart';
 
 // Types
 typedef OnPermissionDeniedCallback = void Function();
 
-class MessageFieldProvider extends ChangeNotifier {
-  // Text controller and node.
-  final TextEditingController textController = TextEditingController();
-  final FocusNode focusNode = FocusNode();
-
+class VoiceMessageProvider extends ChangeNotifier {
   // Audio recorder
   final AudioRecorder _audioRecorder = AudioRecorder();
-
-  // isTextFieldEmpty boolean (editing outside of this class is forbidden)
-  bool _isTextFieldEmpty = true;
-  bool get isTextFieldEmpty => _isTextFieldEmpty;
 
   // isRecording boolean (editing outside of this class is forbidden)
   bool _isRecording = false;
   bool get isRecording => _isRecording;
 
-  final ValueChanged<String> onValue;
-
-  MessageFieldProvider(this.onValue) {
-    textController.addListener(_onTextFieldChanged);
-  }
-
   @override
   void dispose() {
-    textController.dispose();
-    focusNode.dispose();
     _audioRecorder.dispose();
     super.dispose();
-  }
-
-  /// On change Text Field.
-  void _onTextFieldChanged() {
-    final bool isTextFieldActuallyEmpty = textController.text.trim().isEmpty;
-    if (isTextFieldActuallyEmpty != _isTextFieldEmpty) {
-      _isTextFieldEmpty = isTextFieldActuallyEmpty;
-      notifyListeners();
-    }
-  }
-
-  /// On submit Text Field.
-  void onFieldSubmitted(String value) {
-    textController.clear();
-
-    onValue(value);
-  }
-
-  // Functions for recording
-
-  /// Open application settings to grant permissions.
-  void openApplicationSettings() {
-    openAppSettings();
   }
 
   /// Record audio using audiorecorder.
@@ -69,6 +32,9 @@ class MessageFieldProvider extends ChangeNotifier {
     required OnPermissionDeniedCallback callOnPermissionDenied,
   }) async {
     try {
+      // Vibrate phone
+      HapticFeedback.heavyImpact();
+
       // Set isRecording state on UI
       _isRecording = true;
       notifyListeners();
@@ -120,13 +86,10 @@ class MessageFieldProvider extends ChangeNotifier {
 
       // Start recording
       await _audioRecorder.start(recordConfig, path: audioPath);
-      _isRecording = true;
-      print('Recording started');
     } on AudioRecordingException catch (_) {
       // If a known exception was received, rethow it.
       rethrow;
     } catch (exception) {
-      print(exception);
       // If there was a unknown exception, rethown as UnknownAudioRecordingException
       throw UnknownAudioRecordingException(
         originalException: Exception(exception),
@@ -134,15 +97,21 @@ class MessageFieldProvider extends ChangeNotifier {
     }
   }
 
+  /// Stop audio recording.
   Future<void> stopRecording() async {
+    // Vibrate phone
+    HapticFeedback.vibrate();
+
+    // Indicate that recording was ended.
+    _isRecording = false;
+    notifyListeners();
+
+    // Stop recording.
     try {
       final path = await _audioRecorder.stop();
-      _isRecording = false;
-      notifyListeners();
 
       if (path != null) {
         // TODO: Enviar audio.
-        print('Recording stopped');
         print(path);
       }
     } catch (exception) {
