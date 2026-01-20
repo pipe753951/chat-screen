@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import 'package:permission_handler/permission_handler.dart';
-
 import 'package:yes_no_app/infrastructure/exceptions/exceptions.dart';
 import 'package:yes_no_app/infrastructure/services/services.dart';
 
@@ -39,23 +37,20 @@ class VoiceMessageProvider extends ChangeNotifier {
       notifyListeners();
 
       // Request permission
-      final bool hasMicrophonePermission = await permissionsService
-          .requestMicrophonePermission();
-
-      if (!hasMicrophonePermission) {
-        _isRecording = false;
-        notifyListeners();
-
-        callOnPermissionDenied();
-        return;
-      }
+      await permissionsService.requestMicrophonePermission();
 
       audioRecordingService.startRecording();
-    } on AudioRecordingException catch (_) {
-      // If a known exception was received, rethow it.
-      rethrow;
-    } catch (exception) {
-      // If there was a unknown exception, rethown as UnknownAudioRecordingException
+    }
+    // If the microphone permision was denied, inform it to user.
+    on UnauthorizedAudioRecordingException catch (_) {
+      _isRecording = false;
+      notifyListeners();
+
+      callOnPermissionDenied();
+    }
+    // If there was a unknown exception, rethown as UnknownAudioRecordingException
+    catch (exception) {
+      // TODO: Control other exceptions.
       throw UnknownAudioRecordingException(
         originalException: Exception(exception),
       );

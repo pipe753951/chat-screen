@@ -1,10 +1,11 @@
 import 'package:permission_handler/permission_handler.dart';
+import 'package:yes_no_app/infrastructure/exceptions/audio_recording_exceptions.dart';
 
 import 'package:yes_no_app/infrastructure/services/permissions/permissions_service.dart';
 
-class PermissionHandlerPermissionsService extends PermissionsService{
+class PermissionHandlerPermissionsService extends PermissionsService {
   @override
-  Future<bool> requestMicrophonePermission() async {
+  Future<void> requestMicrophonePermission() async {
     // Get Permission
     final audioPermissionStatus = await Permission.microphone.status;
 
@@ -15,16 +16,13 @@ class PermissionHandlerPermissionsService extends PermissionsService{
           .isGranted;
 
       if (!isAudioPermissionGranted) {
-        return false;
+        throw UnauthorizedAudioRecordingException();
       }
     }
 
     // Throw error if the authorization was denied permanently.
     if (audioPermissionStatus.isPermanentlyDenied) {
-      return false;
+      throw UnauthorizedAudioRecordingException();
     }
-
-    // If permission was granted, return true.
-    return true;
   }
 }
