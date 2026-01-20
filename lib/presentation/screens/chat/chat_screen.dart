@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
-import 'package:yes_no_app/domain/entities/message.dart';
 
+import 'package:yes_no_app/domain/entities/message.dart';
 import 'package:yes_no_app/presentation/providers/chat_provider.dart';
-import 'package:yes_no_app/presentation/screens/shared/message_field.dart';
-import 'package:yes_no_app/presentation/widgets/chat/first_person_message_bubble.dart';
-import 'package:yes_no_app/presentation/widgets/chat/second_person_message_bubble.dart';
+import 'package:yes_no_app/presentation/widgets/widgets.dart';
 
 class ChatScreen extends StatelessWidget {
   const ChatScreen({super.key});
