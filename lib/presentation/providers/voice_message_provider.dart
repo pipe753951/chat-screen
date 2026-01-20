@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -12,6 +14,21 @@ class VoiceMessageProvider extends ChangeNotifier {
   bool _isRecording = false;
   bool get isRecording => _isRecording;
 
+  /// Timer
+  Timer? _timer;
+
+  /// Record duration (in seconds)
+  int _recordDuration = 0;
+
+  String get recordDurationFormatted {
+    final String minutes = (_recordDuration ~/ 60).toString().padLeft(2, '0');
+    final String seconds = (_recordDuration % 60).toString().padLeft(2, '0');
+
+    print(_recordDuration);
+    print('$minutes:$seconds');
+    return '$minutes:$seconds';
+  }
+
   final AudioRecordingService audioRecordingService =
       RecordAudioRecordingService();
   final PermissionsService permissionsService =
@@ -21,6 +38,21 @@ class VoiceMessageProvider extends ChangeNotifier {
   void dispose() {
     audioRecordingService.dispose();
     super.dispose();
+  }
+
+  /// Start audio recording timer
+  void _startTimer() {
+    _recordDuration = 0;
+    _timer = Timer.periodic(const Duration(seconds: 1), (Timer timer) {
+      _recordDuration++;
+      notifyListeners();
+    });
+  }
+
+  /// Stop audio recording timer
+  void _stopTimer() {
+    _timer?.cancel();
+    _recordDuration = 0;
   }
 
   /// Record audio using audiorecorder.
@@ -39,7 +71,11 @@ class VoiceMessageProvider extends ChangeNotifier {
       // Request permission
       await permissionsService.requestMicrophonePermission();
 
+      // Start recording
       audioRecordingService.startRecording();
+
+      // Start timer
+      _startTimer();
     }
     // If the microphone permision was denied, inform it to user.
     on UnauthorizedAudioRecordingException catch (_) {
@@ -58,22 +94,24 @@ class VoiceMessageProvider extends ChangeNotifier {
   }
 
   /// Stop audio recording.
-  Future<void> stopRecording() async {
+  Future<void> stopRecording([bool cancel = false]) async {
     // Vibrate phone
     HapticFeedback.vibrate();
 
-    // Indicate that recording was ended.
+    // Indicate that recording was ended and stop timer.
     _isRecording = false;
+    _stopTimer();
+
     notifyListeners();
 
     // Stop recording.
     try {
       final path = await audioRecordingService.stopRecording();
 
-      if (path != null) {
-        // TODO: Enviar audio.
-        print(path);
-      }
+      if (cancel || path == null) return;
+
+      // TODO: Enviar audio.
+      print(path);
     } catch (exception) {
       throw UnknownAudioRecordingException(
         originalException: Exception(exception),

@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
 import 'package:animate_do/animate_do.dart';
+
+import 'package:yes_no_app/presentation/providers/providers.dart';
 
 class VoiceMessageRecordingStatus extends StatefulWidget {
   const VoiceMessageRecordingStatus({super.key});
@@ -35,6 +39,9 @@ class _VoiceMessageRecordingStatusState
 
   @override
   Widget build(BuildContext context) {
+    final VoiceMessageProvider voiceMessageProvider = context
+        .watch<VoiceMessageProvider>();
+
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
 
     return FadeInRight(
@@ -49,14 +56,14 @@ class _VoiceMessageRecordingStatusState
               child: Icon(Icons.mic_rounded, color: colorScheme.primary),
             ),
           ),
-          Text('00:01', style: TextStyle(fontSize: 20)),
+          Text(voiceMessageProvider.recordDurationFormatted, style: TextStyle(fontSize: 20)),
           Expanded(
             child: Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
-                Icon(Icons.arrow_back_ios_new_rounded, size: 20,),
+                Icon(Icons.arrow_back_ios_new_rounded, size: 20),
                 Text('Desliza para cancelar', style: TextStyle(fontSize: 12)),
-                const SizedBox(width: 24,)
+                const SizedBox(width: 24),
               ],
             ),
           ),
