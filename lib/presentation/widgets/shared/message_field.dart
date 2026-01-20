@@ -70,14 +70,11 @@ class TextMessageField extends StatelessWidget {
     );
 
     return TextFormField(
-      onTapOutside: (_) {
-        messageFieldProvider.focusNode.unfocus();
-      },
       focusNode: messageFieldProvider.focusNode,
       controller: messageFieldProvider.textController,
       decoration: inputDecoration,
       onFieldSubmitted: (value) {
-        messageFieldProvider.onFieldSubmitted(value: value, autoFocus: false);
+        messageFieldProvider.onFieldSubmitted(value);
       },
     );
   }
