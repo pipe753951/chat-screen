@@ -20,6 +20,13 @@ class VoiceMessageProvider extends ChangeNotifier {
   /// Record duration (in seconds)
   int _recordDuration = 0;
 
+  /// Voice Recording button drag offset
+  double _dragOffset = 0.0;
+  double get dragOffset => _dragOffset;
+
+  /// Position where the recording cancels.
+  final double _cancelThreshold = -200.0;
+
   String get recordDurationFormatted {
     final String minutes = (_recordDuration ~/ 60).toString().padLeft(2, '0');
     final String seconds = (_recordDuration % 60).toString().padLeft(2, '0');
@@ -38,6 +45,19 @@ class VoiceMessageProvider extends ChangeNotifier {
   void dispose() {
     audioRecordingService.dispose();
     super.dispose();
+  }
+
+  /// Update drag offset
+  void updateDragOffset(double offset) {
+    if (!isRecording) return;
+    print(offset);
+    if (offset < 0) _dragOffset = offset;
+    notifyListeners();
+
+    if (_dragOffset <= _cancelThreshold) {
+      stopRecording(cancel: true);
+      notifyListeners();
+    }
   }
 
   /// Start audio recording timer
@@ -94,12 +114,13 @@ class VoiceMessageProvider extends ChangeNotifier {
   }
 
   /// Stop audio recording.
-  Future<void> stopRecording([bool cancel = false]) async {
+  Future<void> stopRecording({bool cancel = false}) async {
     // Vibrate phone
     HapticFeedback.vibrate();
 
     // Indicate that recording was ended and stop timer.
     _isRecording = false;
+    _dragOffset = 0;
     _stopTimer();
 
     notifyListeners();

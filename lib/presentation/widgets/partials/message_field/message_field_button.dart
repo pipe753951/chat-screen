@@ -92,13 +92,20 @@ class MessageFieldButton extends StatelessWidget {
         child: Material(
           borderRadius: BorderRadius.circular(25),
           color: colorScheme.primary,
-          child: InkWell(
-            borderRadius: BorderRadius.circular(25),
+          child: GestureDetector(
+            onLongPressStart: (_) => onLongPress(context),
+            onLongPressMoveUpdate: (details) {
+              voiceMessageProvider.updateDragOffset(details.localPosition.dx);
+            },
+            onLongPressEnd: (_) => onLongPressUp(context),
+            
+            // Inkwell is used for effects and tap callback
+            child: InkWell(
+              onTap: () => onTap(context),
+              borderRadius: BorderRadius.circular(25),
 
-            onTap: () => onTap(context),
-            onLongPress: () => onLongPress(context),
-            onLongPressUp: () => onLongPressUp(context),
-            child: _MessageButtonIcon(),
+              child: _MessageButtonIcon(),
+            ),
           ),
         ),
       ),

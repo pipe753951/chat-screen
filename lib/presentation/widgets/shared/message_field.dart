@@ -14,24 +14,37 @@ class MessageField extends StatelessWidget {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => ChatInputProvider(onValue)),
-        ChangeNotifierProvider(create: (_) => VoiceMessageProvider())
+        ChangeNotifierProvider(create: (_) => VoiceMessageProvider()),
       ],
-      child: Padding(
-        padding: const EdgeInsetsGeometry.symmetric(vertical: 8),
-        child: Stack(
-          children: [
-            Row(
-              children: [
-                Expanded(child: MessageFieldBox()),
-                const SizedBox(width: 58),
-              ],
-            ),
-            Positioned(
-              right: 0,
-              child: MessageFieldButton(onValue: onValue)
-            ),
-          ],
-        ),
+      child: _MessageFieldContent(onValue: onValue),
+    );
+  }
+}
+
+class _MessageFieldContent extends StatelessWidget {
+  const _MessageFieldContent({required this.onValue});
+
+  final ValueChanged<String> onValue;
+
+  @override
+  Widget build(BuildContext context) {
+    final VoiceMessageProvider voiceMessageProvider = context.watch();
+
+    return Padding(
+      padding: const EdgeInsetsGeometry.symmetric(vertical: 8),
+      child: Stack(
+        children: [
+          Row(
+            children: [
+              Expanded(child: MessageFieldBox()),
+              const SizedBox(width: 58),
+            ],
+          ),
+          Positioned(
+            right: -voiceMessageProvider.dragOffset,
+            child: MessageFieldButton(onValue: onValue),
+          ),
+        ],
       ),
     );
   }
