@@ -1,28 +1,27 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:record/record.dart';
 
 import 'package:yes_no_app/infrastructure/exceptions/exceptions.dart';
+import 'package:yes_no_app/infrastructure/services/services.dart';
 
 // Types
 typedef OnPermissionDeniedCallback = void Function();
 
 class VoiceMessageProvider extends ChangeNotifier {
-  // Audio recorder
-  final AudioRecorder _audioRecorder = AudioRecorder();
-
   // isRecording boolean (editing outside of this class is forbidden)
   bool _isRecording = false;
   bool get isRecording => _isRecording;
 
+  final AudioRecordingService audioRecordingService =
+      RecordAudioRecordingService();
+  final PermissionsService permissionsService =
+      PermissionHandlerPermissionsService();
+
   @override
   void dispose() {
-    _audioRecorder.dispose();
+    audioRecordingService.dispose();
     super.dispose();
   }
 
@@ -39,53 +38,19 @@ class VoiceMessageProvider extends ChangeNotifier {
       _isRecording = true;
       notifyListeners();
 
-      // Get Permission
-      final audioPermissionStatus = await Permission.microphone.status;
-      // Request permission if is denied and can request it.
-      if (audioPermissionStatus.isDenied) {
-        _isRecording = false;
-        notifyListeners();
+      // Request permission
+      final bool hasMicrophonePermission = await permissionsService
+          .requestMicrophonePermission();
 
-        final bool isAudioPermissionGranted = await Permission.microphone
-            .request()
-            .isGranted;
-
-        if (!isAudioPermissionGranted) {
-          callOnPermissionDenied();
-          // throw UnauthorizedAudioRecordingException();
-        }
-
-        return;
-      }
-
-      // Throw error if the authorization was denied permanently.
-      if (audioPermissionStatus.isPermanentlyDenied) {
+      if (!hasMicrophonePermission) {
         _isRecording = false;
         notifyListeners();
 
         callOnPermissionDenied();
-
         return;
-
-        // throw UnauthorizedAudioRecordingException();
       }
 
-      // Get a temporary directory to record audio
-      final Directory tempDir = await getTemporaryDirectory();
-
-      // Create a new route for file
-      final String audioPath =
-          '${tempDir.path}/audio_${DateTime.now().millisecondsSinceEpoch}.mp4';
-
-      // Configure recording
-      const RecordConfig recordConfig = RecordConfig(
-        encoder: AudioEncoder.aacLc, // MP4 standard
-        bitRate: 128000, // Audio Quality (Recommended by Gemini)
-        sampleRate: 44100, // Sampling Frequency (Recommended by Gemini)
-      );
-
-      // Start recording
-      await _audioRecorder.start(recordConfig, path: audioPath);
+      audioRecordingService.startRecording();
     } on AudioRecordingException catch (_) {
       // If a known exception was received, rethow it.
       rethrow;
@@ -108,7 +73,7 @@ class VoiceMessageProvider extends ChangeNotifier {
 
     // Stop recording.
     try {
-      final path = await _audioRecorder.stop();
+      final path = await audioRecordingService.stopRecording();
 
       if (path != null) {
         // TODO: Enviar audio.
