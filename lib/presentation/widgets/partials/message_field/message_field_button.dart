@@ -112,7 +112,7 @@ class _MessageButtonIcon extends StatelessWidget {
       },
       child: messageFieldProvider.isTextFieldEmpty
           ? Icon(
-              Icons.keyboard_voice,
+              Icons.mic_rounded,
               key: ValueKey('mic_icon'),
               color: Colors.white,
             )
