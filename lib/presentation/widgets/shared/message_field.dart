@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import 'package:yes_no_app/presentation/providers/message_field_provider.dart';
-import 'package:yes_no_app/presentation/widgets/widgets.dart' show MessageFieldButton;
+import 'package:yes_no_app/presentation/widgets/widgets.dart'
+    show MessageFieldButton;
 
 class MessageField extends StatelessWidget {
   final ValueChanged<String> onValue;
@@ -27,12 +28,14 @@ class MessageField extends StatelessWidget {
   }
 }
 
-
 class MessageFieldBox extends StatelessWidget {
   const MessageFieldBox({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final MessageFieldProvider messageFieldProvider = context
+        .watch<MessageFieldProvider>();
+
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
     final BoxDecoration boxDecoration = BoxDecoration(
       borderRadius: BorderRadius.circular(25),
@@ -43,8 +46,62 @@ class MessageFieldBox extends StatelessWidget {
       height: 50,
       child: DecoratedBox(
         decoration: boxDecoration,
-        child: Center(child: TextMessageField()),
+        // TODO: Use AnimatedSwitcher
+        // child: AnimatedSwitcher(
+        //   duration: const Duration(milliseconds: 200),
+        //   transitionBuilder: (Widget child, Animation<double> animation) {
+        //     return FadeTransition(opacity: animation, child: child);
+        //   },
+        //   child: messageFieldProvider.isRecording
+        //       ? VoiceMessageRecordingStatus()
+        //       : TextMessageField(),
+        // ),
+        child: VoiceMessageRecordingStatus(),
       ),
+    );
+  }
+}
+
+class VoiceMessageRecordingStatus extends StatefulWidget {
+  const VoiceMessageRecordingStatus({super.key});
+
+  @override
+  State<VoiceMessageRecordingStatus> createState() =>
+      _VoiceMessageRecordingStatusState();
+}
+
+class _VoiceMessageRecordingStatusState
+    extends State<VoiceMessageRecordingStatus>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _voiceIconAnimationController;
+
+  @override
+  void initState() {
+    super.initState();
+
+    // Start _voiceIconAnimationController
+    _voiceIconAnimationController = AnimationController(
+      duration: const Duration(seconds: 2),
+      vsync: this,
+    )..repeat();
+  }
+
+  @override
+  void dispose() {
+    _voiceIconAnimationController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        FadeTransition(
+          opacity: _voiceIconAnimationController,
+          child: const Icon(Icons.mic_rounded),
+        ),
+        Text('2'),
+      ],
     );
   }
 }
