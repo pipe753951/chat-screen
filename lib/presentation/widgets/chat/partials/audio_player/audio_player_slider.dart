@@ -7,7 +7,9 @@ import 'package:audio_waveforms/audio_waveforms.dart';
 import 'package:path_provider/path_provider.dart';
 
 class AudioPlayerSlider extends StatelessWidget {
-  const AudioPlayerSlider({super.key});
+  final String audioPath;
+
+  const AudioPlayerSlider({super.key, required this.audioPath});
 
   @override
   Widget build(BuildContext context) {

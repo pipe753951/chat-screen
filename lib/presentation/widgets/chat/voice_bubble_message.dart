@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:yes_no_app/domain/domain.dart';
-import 'package:yes_no_app/presentation/widgets/widgets.dart';
+import 'package:yes_no_app/presentation/widgets/chat/partials/chat_partials.dart';
 
 class VoiceBubbleMessage extends StatelessWidget {
   final VoiceMessage voiceMessage;
