@@ -39,17 +39,49 @@ class VoiceBubbleMessage extends StatelessWidget {
   }
 }
 
-class _VoiceBubbleMessageLayout extends StatefulWidget {
+class _VoiceBubbleMessageLayout extends StatelessWidget {
   const _VoiceBubbleMessageLayout({required this.voiceMessage});
 
   final VoiceMessage voiceMessage;
 
   @override
-  State<_VoiceBubbleMessageLayout> createState() =>
-      _VoiceBubbleMessageLayoutState();
+  Widget build(BuildContext context) {
+    return Row(
+      spacing: 8,
+      textDirection: (voiceMessage.fromWho == FromWho.me)
+          ? TextDirection.ltr
+          : TextDirection.rtl,
+      children: [
+        SizedBox.square(
+          dimension: 45,
+          child: CircleAvatar(
+            // Photo by Khanh Do - Unsplash
+            backgroundImage: NetworkImage(
+              'https://images.unsplash.com/photo-1764072565527-a079ac59853d?ixlib=rb-4.1.0&q=85&fm=jpg&crop=entropy&cs=srgb&w=640',
+            ),
+          ),
+        ),
+        Expanded(
+          child: _VoiceBubbleMessagePlayer(
+            voiceMessageLocation: voiceMessage.location,
+          ),
+        ),
+      ],
+    );
+  }
 }
 
-class _VoiceBubbleMessageLayoutState extends State<_VoiceBubbleMessageLayout> {
+class _VoiceBubbleMessagePlayer extends StatefulWidget {
+  const _VoiceBubbleMessagePlayer({required this.voiceMessageLocation});
+
+  final String voiceMessageLocation;
+
+  @override
+  State<_VoiceBubbleMessagePlayer> createState() =>
+      _VoiceBubbleMessagePlayerState();
+}
+
+class _VoiceBubbleMessagePlayerState extends State<_VoiceBubbleMessagePlayer> {
   final PlayerController playerController = PlayerController();
   final audioPlayerSlideStyle = PlayerWaveStyle(
     fixedWaveColor: Colors.grey, // Color del audio que falta por oír
@@ -73,7 +105,7 @@ class _VoiceBubbleMessageLayoutState extends State<_VoiceBubbleMessageLayout> {
 
   void preparePlayer() async {
     await playerController.preparePlayer(
-      path: widget.voiceMessage.location,
+      path: widget.voiceMessageLocation,
       shouldExtractWaveform: true,
       noOfSamples: audioPlayerSlideStyle.getSamplesForWidth(150),
     );
@@ -92,44 +124,25 @@ class _VoiceBubbleMessageLayoutState extends State<_VoiceBubbleMessageLayout> {
 
     return Row(
       spacing: 8,
-      textDirection: (widget.voiceMessage.fromWho == FromWho.me)
-          ? TextDirection.ltr
-          : TextDirection.rtl,
       children: [
-        SizedBox.square(
-          dimension: 45,
-          child: CircleAvatar(
-            // Photo by Khanh Do - Unsplash
-            backgroundImage: NetworkImage(
-              'https://images.unsplash.com/photo-1764072565527-a079ac59853d?ixlib=rb-4.1.0&q=85&fm=jpg&crop=entropy&cs=srgb&w=640',
-            ),
-          ),
+        IconButton(
+          onPressed: () {
+            if (isPlaying) playerController.pausePlayer();
+            playerController.startPlayer();
+          },
+          icon: playerController.playerState.isPlaying
+              ? Icon(Icons.pause_rounded)
+              : Icon(Icons.play_arrow_rounded),
+          iconSize: 35,
+          color: colorScheme.onPrimary,
         ),
         Expanded(
-          child: Row(
-            spacing: 8,
-            children: [
-              IconButton(
-                onPressed: () {
-                  if (isPlaying) playerController.pausePlayer();
-                  playerController.startPlayer();
-                },
-                icon: playerController.playerState.isPlaying
-                    ? Icon(Icons.pause_rounded)
-                    : Icon(Icons.play_arrow_rounded),
-                iconSize: 35,
-                color: colorScheme.onPrimary,
-              ),
-              Expanded(
-                child: AudioFileWaveforms(
-                  size: Size(150, 40),
-                  playerController: playerController,
-                  enableSeekGesture: true,
-                  waveformType: WaveformType.fitWidth,
-                  playerWaveStyle: audioPlayerSlideStyle,
-                ),
-              ),
-            ],
+          child: AudioFileWaveforms(
+            size: Size(150, 40),
+            playerController: playerController,
+            enableSeekGesture: true,
+            waveformType: WaveformType.fitWidth,
+            playerWaveStyle: audioPlayerSlideStyle,
           ),
         ),
       ],
