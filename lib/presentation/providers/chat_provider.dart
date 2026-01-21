@@ -11,10 +11,6 @@ class ChatProvider extends ChangeNotifier {
   List<Message> messageList = [
     TextMessage(text: 'Hola Mundo', fromWho: FromWho.me),
     TextMessage(text: 'Estás bien?', fromWho: FromWho.me),
-    // Test voice messages
-    // TODO: Impleent voice messages location
-    VoiceMessage(fromWho: FromWho.me, location: 'location'),
-    VoiceMessage(fromWho: FromWho.other, location: 'location'),
   ];
 
   /// add a new [TextMessage]
