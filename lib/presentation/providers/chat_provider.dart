@@ -28,17 +28,13 @@ class ChatProvider extends ChangeNotifier {
   }
 
   /// add a new [VoiceMessage]
-  VoiceMessage addNewVoiceMessage(String path) {
+  void addNewVoiceMessage(VoiceMessage voiceMessage) {
     // Add message to local list.
-    final newVoiceMessage = VoiceMessage(location: path, fromWho: FromWho.me);
-    messageList.add(newVoiceMessage);
+    messageList.add(voiceMessage);
 
     // Update state.
     notifyListeners();
     moveScrollToBottom();
-
-    // Return new local message.
-    return newVoiceMessage;
   }
 
   /// Create send a new [TextMessage] from [String].
@@ -61,11 +57,14 @@ class ChatProvider extends ChangeNotifier {
   }
 
   Future<void> sendVoiceMessage(VoiceMessage voiceMessage) async {
+    // Add message to state before sending it to repository.
+    addNewVoiceMessage(voiceMessage);
+
     // Send message to repository to process it.
     final List<Message>? response = await chatRepository.processVoiceMessage(
       voiceMessage,
     );
-    
+
     if (response != null) {
       // Add response messages to list
       messageList.addAll(response);
