@@ -14,8 +14,8 @@ class ImageBubbleMessage extends StatelessWidget {
 
     return Align(
       alignment: (imageMessage.fromWho == FromWho.me)
-          ? AlignmentGeometry.centerRight
-          : AlignmentGeometry.centerLeft,
+          ? Alignment.centerRight
+          : Alignment.centerLeft,
       child: ClipRRect(
         borderRadius: BorderRadius.circular(20),
         child: Image.network(
