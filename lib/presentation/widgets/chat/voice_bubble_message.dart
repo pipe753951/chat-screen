@@ -1,6 +1,6 @@
+import 'package:audio_waveforms/audio_waveforms.dart';
 import 'package:flutter/material.dart';
 import 'package:yes_no_app/domain/domain.dart';
-import 'package:yes_no_app/presentation/widgets/chat/partials/chat_partials.dart';
 
 class VoiceBubbleMessage extends StatelessWidget {
   final VoiceMessage voiceMessage;
@@ -39,10 +39,44 @@ class VoiceBubbleMessage extends StatelessWidget {
   }
 }
 
-class _VoiceBubbleMessageLayout extends StatelessWidget {
+class _VoiceBubbleMessageLayout extends StatefulWidget {
   const _VoiceBubbleMessageLayout({required this.voiceMessage});
 
   final VoiceMessage voiceMessage;
+
+  @override
+  State<_VoiceBubbleMessageLayout> createState() =>
+      _VoiceBubbleMessageLayoutState();
+}
+
+class _VoiceBubbleMessageLayoutState extends State<_VoiceBubbleMessageLayout> {
+  final PlayerController playerController = PlayerController();
+  final audioPlayerSlideStyle = PlayerWaveStyle(
+    fixedWaveColor: Colors.grey, // Color del audio que falta por oír
+    liveWaveColor: Colors.blue, // Color del audio ya reproducido
+    spacing: 5, // Espacio entre barras
+    waveThickness: 3, // Grosor de cada barra
+  );
+
+  @override
+  void initState() {
+    prepareAudio();
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    playerController.dispose();
+    super.dispose();
+  }
+
+  void prepareAudio() async {
+    await playerController.preparePlayer(
+      path: widget.voiceMessage.location,
+      shouldExtractWaveform: true,
+      noOfSamples: audioPlayerSlideStyle.getSamplesForWidth(150),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -50,7 +84,7 @@ class _VoiceBubbleMessageLayout extends StatelessWidget {
 
     return Row(
       spacing: 8,
-      textDirection: (voiceMessage.fromWho == FromWho.me)
+      textDirection: (widget.voiceMessage.fromWho == FromWho.me)
           ? TextDirection.ltr
           : TextDirection.rtl,
       children: [
@@ -68,20 +102,22 @@ class _VoiceBubbleMessageLayout extends StatelessWidget {
             spacing: 8,
             children: [
               IconButton(
-                onPressed: () {},
+                onPressed: () {
+                  playerController.startPlayer();
+                },
                 icon: Icon(Icons.play_arrow_rounded),
                 iconSize: 35,
                 color: colorScheme.onPrimary,
               ),
-              Expanded(child: AudioPlayerSlider()),
-              
-              // Expanded(
-              //   child: Slider(
-              //     activeColor: Colors.white,
-              //     value: 0.5,
-              //     onChanged: (_) {},
-              //   ),
-              // ),
+              Expanded(
+                child: AudioFileWaveforms(
+                  size: Size(150, 40),
+                  playerController: playerController,
+                  enableSeekGesture: true,
+                  waveformType: WaveformType.fitWidth,
+                  playerWaveStyle: audioPlayerSlideStyle,
+                ),
+              ),
             ],
           ),
         ),

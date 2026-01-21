@@ -6,7 +6,7 @@ import 'package:yes_no_app/infrastructure/infrastructure.dart';
 class ChatProvider extends ChangeNotifier {
   final ScrollController chatScrollController = ScrollController();
   final ChatRepositoryImplementation chatRepository =
-      ChatRepositoryImplementation(chatDatasource: YesNoMessageDatasource());
+      ChatRepositoryImplementation(chatDatasource: LocalTestingChatDatasource());
 
   List<Message> messageList = [
     TextMessage(text: 'Hola Mundo', fromWho: FromWho.me),
