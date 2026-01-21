@@ -65,7 +65,7 @@ class _ChatView extends StatelessWidget {
                     } else if (message is ImageMessage) {
                       return ImageBubbleMessage(imageMessage: message);
                     } else if (message is VoiceMessage) {
-                      // TODO: Implement VoiceBubbleMessage
+                      return VoiceBubbleMessage(voiceMessage: message,);
                     }
 
                     return TextMessageBubble(
