@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:yes_no_app/domain/domain.dart';
+import 'package:yes_no_app/presentation/widgets/widgets.dart';
 
 class VoiceBubbleMessage extends StatelessWidget {
   final VoiceMessage voiceMessage;
@@ -19,7 +20,7 @@ class VoiceBubbleMessage extends StatelessWidget {
         Container(
           width: size.width,
           height: 65,
-          constraints: BoxConstraints(maxWidth: 250),
+          constraints: BoxConstraints(maxWidth: 300),
           decoration: BoxDecoration(
             color: (voiceMessage.fromWho == FromWho.me)
                 ? colorScheme.primary
@@ -28,39 +29,62 @@ class VoiceBubbleMessage extends StatelessWidget {
           ),
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 10),
-            child: Row(
-              spacing: 8,
-              textDirection: (voiceMessage.fromWho == FromWho.me)
-                  ? TextDirection.ltr
-                  : TextDirection.rtl,
-              children: [
-                SizedBox.square(
-                  dimension: 45,
-                  child: CircleAvatar(
-                    // Photo by Khanh Do - Unsplash
-                    backgroundImage: NetworkImage(
-                      'https://images.unsplash.com/photo-1764072565527-a079ac59853d?ixlib=rb-4.1.0&q=85&fm=jpg&crop=entropy&cs=srgb&w=640',
-                    ),
-                  ),
-                ),
-                Expanded(
-                  child: Row(
-                    children: [
-                      IconButton(
-                        onPressed: () {},
-                        icon: Icon(Icons.play_arrow_rounded),
-                        iconSize: 35,
-                        color: colorScheme.onPrimary,
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
+            child: _VoiceBubbleMessageLayout(voiceMessage: voiceMessage),
           ),
         ),
 
         const SizedBox(height: 10),
+      ],
+    );
+  }
+}
+
+class _VoiceBubbleMessageLayout extends StatelessWidget {
+  const _VoiceBubbleMessageLayout({required this.voiceMessage});
+
+  final VoiceMessage voiceMessage;
+
+  @override
+  Widget build(BuildContext context) {
+    final ColorScheme colorScheme = Theme.of(context).colorScheme;
+
+    return Row(
+      spacing: 8,
+      textDirection: (voiceMessage.fromWho == FromWho.me)
+          ? TextDirection.ltr
+          : TextDirection.rtl,
+      children: [
+        SizedBox.square(
+          dimension: 45,
+          child: CircleAvatar(
+            // Photo by Khanh Do - Unsplash
+            backgroundImage: NetworkImage(
+              'https://images.unsplash.com/photo-1764072565527-a079ac59853d?ixlib=rb-4.1.0&q=85&fm=jpg&crop=entropy&cs=srgb&w=640',
+            ),
+          ),
+        ),
+        Expanded(
+          child: Row(
+            spacing: 8,
+            children: [
+              IconButton(
+                onPressed: () {},
+                icon: Icon(Icons.play_arrow_rounded),
+                iconSize: 35,
+                color: colorScheme.onPrimary,
+              ),
+              Expanded(child: AudioPlayerSlider()),
+              
+              // Expanded(
+              //   child: Slider(
+              //     activeColor: Colors.white,
+              //     value: 0.5,
+              //     onChanged: (_) {},
+              //   ),
+              // ),
+            ],
+          ),
+        ),
       ],
     );
   }

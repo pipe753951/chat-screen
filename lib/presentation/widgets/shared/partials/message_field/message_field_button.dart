@@ -5,9 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:yes_no_app/presentation/providers/providers.dart';
 
 class MessageFieldButton extends StatelessWidget {
-  const MessageFieldButton({super.key, required this.onValue});
-
-  final ValueChanged<String> onValue;
+  const MessageFieldButton({super.key});
 
   void openPermissionDeniedDialog(BuildContext context) {
     showDialog(

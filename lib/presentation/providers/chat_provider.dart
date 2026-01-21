@@ -17,30 +17,59 @@ class ChatProvider extends ChangeNotifier {
     VoiceMessage(fromWho: FromWho.other, location: 'location'),
   ];
 
-  TextMessage addNewTextMessage(String text) {
+  /// add a new [TextMessage]
+  void addNewTextMessage(TextMessage message) {
     // Add message to local list.
-    final newMessage = TextMessage(text: text, fromWho: FromWho.me);
-    messageList.add(newMessage);
+    messageList.add(message);
+
+    // Update state.
+    notifyListeners();
+    moveScrollToBottom();
+  }
+
+  /// add a new [VoiceMessage]
+  VoiceMessage addNewVoiceMessage(String path) {
+    // Add message to local list.
+    final newVoiceMessage = VoiceMessage(location: path, fromWho: FromWho.me);
+    messageList.add(newVoiceMessage);
 
     // Update state.
     notifyListeners();
     moveScrollToBottom();
 
     // Return new local message.
-    return newMessage;
+    return newVoiceMessage;
   }
 
-  Future<void> sendMessage(String text) async {
-    if (text.isEmpty) return;
+  /// Create send a new [TextMessage] from [String].
+  Future<void> sendTextMessage(TextMessage message) async {
+    if (message.text.isEmpty) return;
 
     // Add message to state before sending it to repository.
-    final TextMessage newMessage = addNewTextMessage(text);
+    addNewTextMessage(message);
 
     // Send message to repository and save response to a variable
-    final List<Message>? response = await chatRepository.processTextMessage(newMessage);
-    
+    final List<Message>? response = await chatRepository.processTextMessage(
+      message,
+    );
+
     if (response != null) {
       messageList.addAll(response);
+      notifyListeners();
+      moveScrollToBottom();
+    }
+  }
+
+  Future<void> sendVoiceMessage(VoiceMessage voiceMessage) async {
+    // Send message to repository to process it.
+    final List<Message>? response = await chatRepository.processVoiceMessage(
+      voiceMessage,
+    );
+    
+    if (response != null) {
+      // Add response messages to list
+      messageList.addAll(response);
+
       notifyListeners();
       moveScrollToBottom();
     }

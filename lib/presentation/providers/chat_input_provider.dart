@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:yes_no_app/domain/domain.dart';
+
+typedef OnSendTextMessage = Function(TextMessage);
 
 class ChatInputProvider extends ChangeNotifier {
   // Text controller and node.
@@ -9,9 +12,9 @@ class ChatInputProvider extends ChangeNotifier {
   bool _isTextFieldEmpty = true;
   bool get isTextFieldEmpty => _isTextFieldEmpty;
 
-  final ValueChanged<String> onValue;
+  final OnSendTextMessage onSendTextMessage;
 
-  ChatInputProvider(this.onValue) {
+  ChatInputProvider(this.onSendTextMessage) {
     textController.addListener(() {
       final bool isTextFieldActuallyEmpty = textController.text.trim().isEmpty;
       if (isTextFieldActuallyEmpty != _isTextFieldEmpty) {
@@ -31,6 +34,16 @@ class ChatInputProvider extends ChangeNotifier {
   /// On submit Text Field.
   void onFieldSubmitted(String value) {
     textController.clear();
-    onValue(value);
+    _returnTextMessage(value);
+  }
+
+  /// Send a new [TextMessage] to proccess as widget MessageField has indicated.
+  void _returnTextMessage(String text) {
+    final TextMessage newTextMessage = TextMessage(
+      fromWho: FromWho.me,
+      text: text,
+    );
+
+    onSendTextMessage(newTextMessage);
   }
 }

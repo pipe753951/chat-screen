@@ -2,14 +2,21 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:yes_no_app/domain/domain.dart';
 
 import 'package:yes_no_app/infrastructure/exceptions/exceptions.dart';
 import 'package:yes_no_app/infrastructure/services/services.dart';
 
 // Types
 typedef OnPermissionDeniedCallback = void Function();
+typedef OnSendVoiceMessage = void Function(VoiceMessage message);
 
 class VoiceMessageProvider extends ChangeNotifier {
+  VoiceMessageProvider(this.onSendVoiceMessage);
+
+  // Required functions
+  final OnSendVoiceMessage onSendVoiceMessage;
+
   // isRecording boolean (editing outside of this class is forbidden)
   bool _isRecording = false;
   bool get isRecording => _isRecording;
@@ -31,8 +38,6 @@ class VoiceMessageProvider extends ChangeNotifier {
     final String minutes = (_recordDuration ~/ 60).toString().padLeft(2, '0');
     final String seconds = (_recordDuration % 60).toString().padLeft(2, '0');
 
-    print(_recordDuration);
-    print('$minutes:$seconds');
     return '$minutes:$seconds';
   }
 
@@ -45,34 +50,6 @@ class VoiceMessageProvider extends ChangeNotifier {
   void dispose() {
     audioRecordingService.dispose();
     super.dispose();
-  }
-
-  /// Update drag offset
-  void updateDragOffset(double offset) {
-    if (!isRecording) return;
-    print(offset);
-    if (offset < 0) _dragOffset = offset;
-    notifyListeners();
-
-    if (_dragOffset <= _cancelThreshold) {
-      stopRecording(cancel: true);
-      notifyListeners();
-    }
-  }
-
-  /// Start audio recording timer
-  void _startTimer() {
-    _recordDuration = 0;
-    _timer = Timer.periodic(const Duration(seconds: 1), (Timer timer) {
-      _recordDuration++;
-      notifyListeners();
-    });
-  }
-
-  /// Stop audio recording timer
-  void _stopTimer() {
-    _timer?.cancel();
-    _recordDuration = 0;
   }
 
   /// Record audio using audiorecorder.
@@ -90,6 +67,8 @@ class VoiceMessageProvider extends ChangeNotifier {
 
       // Request permission
       await permissionsService.requestMicrophonePermission();
+
+      // TODO: Cancel Recording if permission was granted but previously not determined.
 
       // Start recording
       audioRecordingService.startRecording();
@@ -131,12 +110,50 @@ class VoiceMessageProvider extends ChangeNotifier {
 
       if (cancel || path == null) return;
 
-      // TODO: Enviar audio.
-      print(path);
+      _returnRecordedMessage(path);
     } catch (exception) {
       throw UnknownAudioRecordingException(
         originalException: Exception(exception),
       );
     }
+  }
+
+  /// Send a new [VoiceMessage] to proccess as widget MessageField has indicated.
+  void _returnRecordedMessage(String path) {
+    // Create voice message
+    final VoiceMessage recordedVoiceMessage = VoiceMessage(
+      fromWho: FromWho.me,
+      location: path,
+    );
+
+    onSendVoiceMessage(recordedVoiceMessage);
+  }
+
+  /// Update drag offset
+  void updateDragOffset(double offset) {
+    if (!isRecording) return;
+
+    if (offset < 0) _dragOffset = offset;
+    notifyListeners();
+
+    if (_dragOffset <= _cancelThreshold) {
+      stopRecording(cancel: true);
+      notifyListeners();
+    }
+  }
+
+  /// Start audio recording timer
+  void _startTimer() {
+    _recordDuration = 0;
+    _timer = Timer.periodic(const Duration(seconds: 1), (Timer timer) {
+      _recordDuration++;
+      notifyListeners();
+    });
+  }
+
+  /// Stop audio recording timer
+  void _stopTimer() {
+    _timer?.cancel();
+    _recordDuration = 0;
   }
 }

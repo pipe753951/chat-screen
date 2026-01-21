@@ -65,7 +65,7 @@ class _ChatView extends StatelessWidget {
                     } else if (message is ImageMessage) {
                       return ImageBubbleMessage(imageMessage: message);
                     } else if (message is VoiceMessage) {
-                      return VoiceBubbleMessage(voiceMessage: message,);
+                      return VoiceBubbleMessage(voiceMessage: message);
                     }
 
                     return TextMessageBubble(
@@ -80,7 +80,10 @@ class _ChatView extends StatelessWidget {
             ),
 
             // Caja de texto de mensajes
-            MessageField(onValue: chatProvider.sendMessage),
+            MessageField(
+              onSendTextMessage: chatProvider.sendTextMessage,
+              onSendVoiceMessage: chatProvider.sendVoiceMessage,
+            ),
           ],
         ),
       ),
