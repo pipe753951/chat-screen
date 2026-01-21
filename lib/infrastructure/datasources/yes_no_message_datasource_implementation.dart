@@ -14,17 +14,16 @@ class YesNoMessageDatasource extends ChatDatasource {
     return await getAnswer();
   }
 
+  @override
+  Future<List<Message>?> processVoiceMessage(VoiceMessage message) async {
+    return await getAnswer();
+  }
+
   Future<List<Message>?> getAnswer() async {
     final response = await _dio.get('https://yes-no-wtf.vercel.app/api');
 
     final yesNoModel = YesNoModel.fromJsonMap(response.data);
 
     return yesNoModel.toMessageEntity();
-  }
-  
-  @override
-  Future<List<Message>?> processVoiceMessage(VoiceMessage message) {
-    // TODO: implement processVoiceMesage
-    throw UnimplementedError();
   }
 }
