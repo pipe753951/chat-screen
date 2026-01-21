@@ -9,13 +9,13 @@ class ChatProvider extends ChangeNotifier {
       ChatRepositoryImplementation(chatDatasource: YesNoMessageDatasource());
 
   List<Message> messageList = [
-    Message(text: 'Hola Mundo', fromWho: FromWho.me),
-    Message(text: 'Estás bien?', fromWho: FromWho.me),
+    TextMessage(text: 'Hola Mundo', fromWho: FromWho.me),
+    TextMessage(text: 'Estás bien?', fromWho: FromWho.me),
   ];
 
-  Message addNewMessage(String text) {
+  TextMessage addNewTextMessage(String text) {
     // Add message to local list.
-    final newMessage = Message(text: text, fromWho: FromWho.me);
+    final newMessage = TextMessage(text: text, fromWho: FromWho.me);
     messageList.add(newMessage);
 
     // Update state.
@@ -30,12 +30,13 @@ class ChatProvider extends ChangeNotifier {
     if (text.isEmpty) return;
 
     // Add message to state before sending it to repository.
-    final Message newMessage = addNewMessage(text);
+    final TextMessage newMessage = addNewTextMessage(text);
 
     // Send message to repository and save response to a variable
-    final Message? response = await chatRepository.processMesage(newMessage);
+    final List<Message>? response = await chatRepository.processTextMessage(newMessage);
+    
     if (response != null) {
-      messageList.add(response);
+      messageList.addAll(response);
       notifyListeners();
       moveScrollToBottom();
     }

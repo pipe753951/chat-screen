@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
-import 'package:yes_no_app/domain/entities/message.dart';
+import 'package:yes_no_app/domain/domain.dart';
+
 import 'package:yes_no_app/presentation/providers/chat_provider.dart';
+import 'package:yes_no_app/presentation/widgets/chat/image_bubble_message.dart';
 import 'package:yes_no_app/presentation/widgets/widgets.dart';
 
 class ChatScreen extends StatelessWidget {
@@ -58,9 +60,20 @@ class _ChatView extends StatelessWidget {
                   itemBuilder: (context, index) {
                     final message = chatProvider.messageList[index];
 
-                    return message.fromWho == FromWho.other
-                        ? SecondPersonMessageBubble(message: message)
-                        : FirstPersonMessageBubble(message: message);
+                    if (message is TextMessage) {
+                      return TextMessageBubble(message: message);
+                    } else if (message is ImageMessage) {
+                      return ImageBubbleMessage(imageMessage: message);
+                    } else if (message is VoiceMessage) {
+                      // TODO: Implement VoiceBubbleMessage
+                    }
+
+                    return TextMessageBubble(
+                      message: TextMessage(
+                        fromWho: FromWho.me,
+                        text: 'Desconocido.',
+                      ),
+                    );
                   },
                 ),
               ),

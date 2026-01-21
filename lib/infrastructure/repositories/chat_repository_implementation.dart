@@ -4,9 +4,14 @@ class ChatRepositoryImplementation extends ChatRepository {
   final ChatDatasource chatDatasource;
 
   ChatRepositoryImplementation({required this.chatDatasource});
-
+  
   @override
-  Future<Message?> processMesage(Message message) async {
-    return await chatDatasource.processMesage(message);
+  Future<List<Message>> processTextMessage(TextMessage message) {
+    return chatDatasource.processTextMessage(message);
+  }
+  
+  @override
+  Future<List<Message>> processVoiceMessage(VoiceMessage message) {
+    return chatDatasource.processVoiceMessage(message);
   }
 }

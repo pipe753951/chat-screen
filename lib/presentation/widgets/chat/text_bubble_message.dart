@@ -1,22 +1,25 @@
 import 'package:flutter/material.dart';
-import 'package:yes_no_app/domain/entities/message.dart';
+import 'package:yes_no_app/domain/domain.dart';
 
-class FirstPersonMessageBubble extends StatelessWidget {
-  final Message message;
+class TextMessageBubble extends StatelessWidget {
+  final TextMessage message;
 
-  const FirstPersonMessageBubble({super.key, required this.message});
+  const TextMessageBubble({super.key, required this.message});
 
   @override
   Widget build(BuildContext context) {
-
     final colors = Theme.of(context).colorScheme;
 
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.end,
+      crossAxisAlignment: (message.fromWho == FromWho.me)
+          ? CrossAxisAlignment.end
+          : CrossAxisAlignment.start,
       children: [
         Container(
           decoration: BoxDecoration(
-            color: colors.primary,
+            color: (message.fromWho == FromWho.me)
+                ? colors.primary
+                : colors.secondary,
             borderRadius: BorderRadius.circular(20),
           ),
           child: Padding(
