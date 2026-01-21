@@ -94,6 +94,8 @@ class VoiceMessageProvider extends ChangeNotifier {
 
   /// Stop audio recording.
   Future<void> stopRecording({bool cancel = false}) async {
+    if (!isRecording) return;
+    
     // Vibrate phone
     HapticFeedback.vibrate();
 
