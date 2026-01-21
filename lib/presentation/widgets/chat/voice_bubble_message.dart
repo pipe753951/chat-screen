@@ -53,14 +53,15 @@ class _VoiceBubbleMessageLayoutState extends State<_VoiceBubbleMessageLayout> {
   final PlayerController playerController = PlayerController();
   final audioPlayerSlideStyle = PlayerWaveStyle(
     fixedWaveColor: Colors.grey, // Color del audio que falta por oír
-    liveWaveColor: Colors.blue, // Color del audio ya reproducido
+    liveWaveColor: Colors.white, // Color del audio ya reproducido
     spacing: 5, // Espacio entre barras
     waveThickness: 3, // Grosor de cada barra
   );
+  bool isPlaying = false;
 
   @override
   void initState() {
-    prepareAudio();
+    preparePlayer();
     super.initState();
   }
 
@@ -70,12 +71,19 @@ class _VoiceBubbleMessageLayoutState extends State<_VoiceBubbleMessageLayout> {
     super.dispose();
   }
 
-  void prepareAudio() async {
+  void preparePlayer() async {
     await playerController.preparePlayer(
       path: widget.voiceMessage.location,
       shouldExtractWaveform: true,
       noOfSamples: audioPlayerSlideStyle.getSamplesForWidth(150),
     );
+    await playerController.setFinishMode(finishMode: FinishMode.pause);
+
+    playerController.onPlayerStateChanged.listen((PlayerState state) {
+      setState(() {
+        isPlaying = state.isPlaying;
+      });
+    });
   }
 
   @override
@@ -103,9 +111,12 @@ class _VoiceBubbleMessageLayoutState extends State<_VoiceBubbleMessageLayout> {
             children: [
               IconButton(
                 onPressed: () {
+                  if (isPlaying) playerController.pausePlayer();
                   playerController.startPlayer();
                 },
-                icon: Icon(Icons.play_arrow_rounded),
+                icon: playerController.playerState.isPlaying
+                    ? Icon(Icons.pause_rounded)
+                    : Icon(Icons.play_arrow_rounded),
                 iconSize: 35,
                 color: colorScheme.onPrimary,
               ),
