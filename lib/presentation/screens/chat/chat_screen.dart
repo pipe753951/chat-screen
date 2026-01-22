@@ -1,17 +1,26 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
-import 'package:yes_no_app/domain/entities/message.dart';
+
+import 'package:yes_no_app/domain/domain.dart';
 
 import 'package:yes_no_app/presentation/providers/chat_provider.dart';
-import 'package:yes_no_app/presentation/screens/shared/message_field_box.dart';
-import 'package:yes_no_app/presentation/widgets/chat/first_person_message_bubble.dart';
-import 'package:yes_no_app/presentation/widgets/chat/second_person_message_bubble.dart';
+import 'package:yes_no_app/presentation/widgets/chat/image_bubble_message.dart';
+import 'package:yes_no_app/presentation/widgets/widgets.dart';
 
 class ChatScreen extends StatelessWidget {
   const ChatScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final ColorScheme colorScheme = Theme.of(context).colorScheme;
+    SystemChrome.setSystemUIOverlayStyle(
+      SystemUiOverlayStyle(
+        systemNavigationBarColor: colorScheme.surface,
+        systemNavigationBarIconBrightness: Brightness.dark,
+      ),
+    );
+
     return Scaffold(
       appBar: AppBar(
         leading: const Padding(
@@ -36,30 +45,44 @@ class _ChatView extends StatelessWidget {
     final chatProvider = context.watch<ChatProvider>();
 
     return SafeArea(
-      // left: false,
-      // right: false,
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 10),
         child: Column(
           children: [
             Expanded(
-              child: ListView.builder(
-                controller: chatProvider.chatScrollController,
-                itemCount: chatProvider.messageList.length,
-                itemBuilder: (context, index) {
-                  final message = chatProvider.messageList[index];
+              child: ClipRRect(
+                borderRadius: const BorderRadius.vertical(
+                  bottom: Radius.circular(20),
+                ),
+                child: ListView.builder(
+                  controller: chatProvider.chatScrollController,
+                  itemCount: chatProvider.messageList.length,
+                  itemBuilder: (context, index) {
+                    final message = chatProvider.messageList[index];
 
-                  return message.fromWho == FromWho.other
-                      ? SecondPersonMessageBubble(message: message)
-                      : FirstPersonMessageBubble(message: message);
-                },
+                    if (message is TextMessage) {
+                      return TextMessageBubble(message: message);
+                    } else if (message is ImageMessage) {
+                      return ImageBubbleMessage(imageMessage: message);
+                    } else if (message is VoiceMessage) {
+                      return VoiceBubbleMessage(voiceMessage: message);
+                    }
+
+                    return TextMessageBubble(
+                      message: TextMessage(
+                        fromWho: FromWho.me,
+                        text: 'Desconocido.',
+                      ),
+                    );
+                  },
+                ),
               ),
             ),
 
             // Caja de texto de mensajes
-            MessageFieldBox(
-              // onValue: (value) => chatProvider.sendMessage(value),
-              onValue: chatProvider.sendMessage,
+            MessageField(
+              onSendTextMessage: chatProvider.sendTextMessage,
+              onSendVoiceMessage: chatProvider.sendVoiceMessage,
             ),
           ],
         ),
