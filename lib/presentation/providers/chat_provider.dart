@@ -1,38 +1,73 @@
 import 'package:flutter/material.dart';
-import 'package:yes_no_app/config/helpers/get_yes_no_answer.dart';
-import 'package:yes_no_app/domain/entities/message.dart';
+
+import 'package:yes_no_app/domain/domain.dart';
+import 'package:yes_no_app/infrastructure/infrastructure.dart';
 
 class ChatProvider extends ChangeNotifier {
   final ScrollController chatScrollController = ScrollController();
-  final GetYesNoAnswer getYesNoAnswer = GetYesNoAnswer();
+  final ChatRepositoryImplementation chatRepository =
+      ChatRepositoryImplementation(chatDatasource: LocalTestingChatDatasource());
 
   List<Message> messageList = [
-    Message(text: 'Hola Mundo', fromWho: FromWho.me),
-    Message(text: 'Estás bien?', fromWho: FromWho.me),
+    TextMessage(text: 'Hola Mundo', fromWho: FromWho.me),
+    TextMessage(text: 'Estás bien?', fromWho: FromWho.me),
   ];
 
-  Future<void> sendMessage(String text) async {
-    if (text.isEmpty) return;
+  /// add a new [TextMessage]
+  void addNewTextMessage(TextMessage message) {
+    // Add message to local list.
+    messageList.add(message);
 
-    final newMessage = Message(text: text, fromWho: FromWho.me);
-    messageList.add(newMessage);
-
-    if (text.endsWith('?')) {
-      secondPersonReply();
-      return;
-    }
-
+    // Update state.
     notifyListeners();
     moveScrollToBottom();
   }
 
-  Future<void> secondPersonReply() async {
-    final secondPersonMessage = await getYesNoAnswer.getAnswer();
+  /// add a new [VoiceMessage]
+  void addNewVoiceMessage(VoiceMessage voiceMessage) {
+    // Add message to local list.
+    messageList.add(voiceMessage);
 
-    messageList.add(secondPersonMessage);
+    // Update state.
     notifyListeners();
-
     moveScrollToBottom();
+  }
+
+  /// Create send a new [TextMessage] from [String].
+  Future<void> sendTextMessage(TextMessage message) async {
+    if (message.text.isEmpty) return;
+
+    // Add message to state before sending it to repository.
+    addNewTextMessage(message);
+
+    // Send message to repository and save response to a variable
+    final List<Message>? response = await chatRepository.processTextMessage(
+      message,
+    );
+
+    if (response != null) {
+      messageList.addAll(response);
+      notifyListeners();
+      moveScrollToBottom();
+    }
+  }
+
+  Future<void> sendVoiceMessage(VoiceMessage voiceMessage) async {
+    // Add message to state before sending it to repository.
+    addNewVoiceMessage(voiceMessage);
+
+    // Send message to repository to process it.
+    final List<Message>? response = await chatRepository.processVoiceMessage(
+      voiceMessage,
+    );
+
+    if (response != null) {
+      // Add response messages to list
+      messageList.addAll(response);
+
+      notifyListeners();
+      moveScrollToBottom();
+    }
   }
 
   Future<void> moveScrollToBottom() async {
