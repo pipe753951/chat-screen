@@ -9,12 +9,6 @@ class AudioRecordingException implements Exception {
   }
 }
 
-class UnauthorizedAudioRecordingException extends AudioRecordingException {
-  UnauthorizedAudioRecordingException({
-    super.message = 'The device didn\'t grant audio permission',
-  });
-}
-
 class UnknownAudioRecordingException extends AudioRecordingException {
   final Exception originalException;
   UnknownAudioRecordingException({

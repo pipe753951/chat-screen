@@ -3,8 +3,8 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:yes_no_app/domain/domain.dart';
-
 import 'package:yes_no_app/infrastructure/exceptions/exceptions.dart';
+
 import 'package:yes_no_app/infrastructure/services/services.dart';
 
 // Types
@@ -57,45 +57,52 @@ class VoiceMessageProvider extends ChangeNotifier {
   Future<void> startRecording({
     required OnPermissionDeniedCallback callOnPermissionDenied,
   }) async {
-    try {
-      // Vibrate phone
-      HapticFeedback.heavyImpact();
+    // Vibrate phone
+    HapticFeedback.heavyImpact();
 
-      // Set isRecording state on UI
-      _isRecording = true;
-      notifyListeners();
+    // Set isRecording state on UI
+    _isRecording = true;
+    notifyListeners();
 
-      // Request permission
-      await permissionsService.requestMicrophonePermission();
+    // Check permission
+    HandledPermissionStatus microphonePermissionStatus =
+        await permissionsService.checkMicrophonePermission();
 
-      // TODO: Cancel Recording if permission was granted but previously not determined.
-
-      // Start recording
-      audioRecordingService.startRecording();
-
-      // Start timer
-      _startTimer();
-    }
-    // If the microphone permision was denied, inform it to user.
-    on UnauthorizedAudioRecordingException catch (_) {
+    // If permission isn't granted, cancel immediately recording
+    if (microphonePermissionStatus != HandledPermissionStatus.granted) {
       _isRecording = false;
       notifyListeners();
+    }
 
+    // Try to request permission if possible
+    if (microphonePermissionStatus == HandledPermissionStatus.notDetermined ||
+        microphonePermissionStatus == HandledPermissionStatus.denied) {
+      microphonePermissionStatus = await permissionsService
+          .requestMicrophonePermission();
+    }
+
+    // If permission is permanently denied, call callOnPermissionDenied().
+    if (microphonePermissionStatus ==
+        HandledPermissionStatus.permanentlyDenied) {
       callOnPermissionDenied();
     }
-    // If there was a unknown exception, rethown as UnknownAudioRecordingException
-    catch (exception) {
-      // TODO: Control other exceptions.
-      throw UnknownAudioRecordingException(
-        originalException: Exception(exception),
-      );
-    }
+
+    // Request permission
+    await permissionsService.requestMicrophonePermission();
+
+    // TODO: Cancel Recording if permission was granted but previously not determined.
+
+    // Start recording
+    audioRecordingService.startRecording();
+
+    // Start timer
+    _startTimer();
   }
 
   /// Stop audio recording.
   Future<void> stopRecording({bool cancel = false}) async {
     if (!isRecording) return;
-    
+
     // Vibrate phone
     HapticFeedback.vibrate();
 
@@ -109,7 +116,6 @@ class VoiceMessageProvider extends ChangeNotifier {
     // Stop recording.
     try {
       final path = await audioRecordingService.stopRecording();
-
       if (cancel || path == null) return;
 
       _returnRecordedMessage(path);
