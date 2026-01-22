@@ -83,18 +83,22 @@ class _VoiceBubbleMessagePlayer extends StatefulWidget {
 
 class _VoiceBubbleMessagePlayerState extends State<_VoiceBubbleMessagePlayer> {
   final PlayerController playerController = PlayerController();
+
+  late Future<void> _preparePlayerFuture;
+
   final audioPlayerSlideStyle = PlayerWaveStyle(
     fixedWaveColor: Colors.grey, // Color del audio que falta por oír
     liveWaveColor: Colors.white, // Color del audio ya reproducido
     spacing: 5, // Espacio entre barras
     waveThickness: 3, // Grosor de cada barra
   );
-  bool isPlaying = false;
 
   @override
   void initState() {
-    preparePlayer();
     super.initState();
+
+    // 2. Inicializamos el Future solo una vez aquí
+    _preparePlayerFuture = _preparePlayer();
   }
 
   @override
@@ -103,18 +107,20 @@ class _VoiceBubbleMessagePlayerState extends State<_VoiceBubbleMessagePlayer> {
     super.dispose();
   }
 
-  void preparePlayer() async {
+  Future<void> _preparePlayer() async {
     await playerController.preparePlayer(
       path: widget.voiceMessageLocation,
-      shouldExtractWaveform: true,
+      shouldExtractWaveform: false,
+
+      // Usamos un valor fijo o calculado una vez
       noOfSamples: audioPlayerSlideStyle.getSamplesForWidth(150),
     );
+
     await playerController.setFinishMode(finishMode: FinishMode.pause);
 
-    playerController.onPlayerStateChanged.listen((PlayerState state) {
-      setState(() {
-        isPlaying = state.isPlaying;
-      });
+    // Escuchar cambios de estado para actualizar el icono de play/pause
+    playerController.onPlayerStateChanged.listen((_) {
+      if (mounted) setState(() {});
     });
   }
 
@@ -122,27 +128,69 @@ class _VoiceBubbleMessagePlayerState extends State<_VoiceBubbleMessagePlayer> {
   Widget build(BuildContext context) {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
 
+    return FutureBuilder(
+      // 3. Usamos la variable guardada, no la función directa
+      future: _preparePlayerFuture,
+      builder: (context, asyncSnapshot) {
+        if (asyncSnapshot.connectionState == ConnectionState.waiting) {
+          return _buildLoadingState(colorScheme);
+        }
+
+        return Row(
+          spacing: 8,
+          children: [
+            IconButton(
+              onPressed: () async {
+                if (playerController.playerState.isPlaying) {
+                  await playerController.pausePlayer();
+                } else {
+                  playerController.startPlayer();
+                }
+                setState(() {});
+              },
+              icon: playerController.playerState.isPlaying
+                  ? Icon(Icons.pause_rounded)
+                  : Icon(Icons.play_arrow_rounded),
+              iconSize: 35,
+              color: colorScheme.onPrimary,
+            ),
+            Expanded(
+              child: AudioFileWaveforms(
+                size: Size(150, 40),
+                playerController: playerController,
+                enableSeekGesture: true,
+                waveformType: WaveformType.fitWidth,
+                playerWaveStyle: audioPlayerSlideStyle,
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _buildLoadingState(ColorScheme colorScheme) {
     return Row(
       spacing: 8,
       children: [
-        IconButton(
-          onPressed: () {
-            if (isPlaying) playerController.pausePlayer();
-            playerController.startPlayer();
-          },
-          icon: playerController.playerState.isPlaying
-              ? Icon(Icons.pause_rounded)
-              : Icon(Icons.play_arrow_rounded),
-          iconSize: 35,
-          color: colorScheme.onPrimary,
+        SizedBox.square(
+          dimension: 40,
+          child: Center(
+            child: SizedBox.square(
+              dimension: 25,
+              child: CircularProgressIndicator(
+                color: colorScheme.onPrimary,
+                strokeWidth: 3,
+                year2023: true,
+              ),
+            ),
+          ),
         ),
         Expanded(
-          child: AudioFileWaveforms(
-            size: Size(150, 40),
-            playerController: playerController,
-            enableSeekGesture: true,
-            waveformType: WaveformType.fitWidth,
-            playerWaveStyle: audioPlayerSlideStyle,
+          child: LinearProgressIndicator(
+            year2023: false,
+            backgroundColor: colorScheme.surfaceContainerHighest,
+            color: colorScheme.surface,
           ),
         ),
       ],
