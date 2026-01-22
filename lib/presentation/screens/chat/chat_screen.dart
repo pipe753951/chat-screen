@@ -5,7 +5,6 @@ import 'package:provider/provider.dart';
 import 'package:yes_no_app/domain/domain.dart';
 
 import 'package:yes_no_app/presentation/providers/chat_provider.dart';
-import 'package:yes_no_app/presentation/widgets/chat/image_bubble_message.dart';
 import 'package:yes_no_app/presentation/widgets/widgets.dart';
 
 class ChatScreen extends StatelessWidget {
