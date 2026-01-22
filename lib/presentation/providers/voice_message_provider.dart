@@ -79,18 +79,15 @@ class VoiceMessageProvider extends ChangeNotifier {
         microphonePermissionStatus == HandledPermissionStatus.denied) {
       microphonePermissionStatus = await permissionsService
           .requestMicrophonePermission();
+      return;
     }
 
     // If permission is permanently denied, call callOnPermissionDenied().
     if (microphonePermissionStatus ==
         HandledPermissionStatus.permanentlyDenied) {
       callOnPermissionDenied();
+      return;
     }
-
-    // Request permission
-    await permissionsService.requestMicrophonePermission();
-
-    // TODO: Cancel Recording if permission was granted but previously not determined.
 
     // Start recording
     audioRecordingService.startRecording();
