@@ -1,4 +1,4 @@
-package com.example.yes_no_app
+package com.davidpuentes.chat_screen
 
 import io.flutter.embedding.android.FlutterActivity
 

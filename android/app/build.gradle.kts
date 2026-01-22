@@ -6,7 +6,7 @@ plugins {
 }
 
 android {
-    namespace = "com.example.yes_no_app"
+    namespace = "com.davidpuentes.chat_screen"
     compileSdk = 36
 
     // Fuerza a usar tu versión instalada del NDK
@@ -23,7 +23,7 @@ android {
 
     defaultConfig {
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
-        applicationId = "com.example.yes_no_app"
+        applicationId = "com.davidpuentes.chat_screen"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
         minSdk = flutter.minSdkVersion
