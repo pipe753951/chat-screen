@@ -108,12 +108,13 @@ class _VoiceBubbleMessagePlayerState extends State<_VoiceBubbleMessagePlayer> {
   }
 
   Future<void> _preparePlayer() async {
+    final int noOfSamples = audioPlayerSlideStyle.getSamplesForWidth(150);
     await playerController.preparePlayer(
       path: widget.voiceMessageLocation,
-      shouldExtractWaveform: false,
+      shouldExtractWaveform: true,
 
       // Usamos un valor fijo o calculado una vez
-      noOfSamples: audioPlayerSlideStyle.getSamplesForWidth(150),
+      noOfSamples: noOfSamples,
     );
 
     await playerController.setFinishMode(finishMode: FinishMode.pause);
@@ -154,13 +155,17 @@ class _VoiceBubbleMessagePlayerState extends State<_VoiceBubbleMessagePlayer> {
               iconSize: 35,
               color: colorScheme.onPrimary,
             ),
-            Expanded(
-              child: AudioFileWaveforms(
-                size: Size(150, 40),
-                playerController: playerController,
-                enableSeekGesture: true,
-                waveformType: WaveformType.fitWidth,
-                playerWaveStyle: audioPlayerSlideStyle,
+            Center(
+              child: SizedBox(
+                width: 150,
+                height: 40,
+                child: AudioFileWaveforms(
+                  size: Size(150, 40),
+                  playerController: playerController,
+                  enableSeekGesture: true,
+                  waveformType: WaveformType.fitWidth,
+                  playerWaveStyle: audioPlayerSlideStyle,
+                ),
               ),
             ),
           ],
