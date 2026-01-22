@@ -49,13 +49,13 @@ class MessageFieldButton extends StatelessWidget {
   void onLongPress(BuildContext context) {
     final ChatInputProvider messageFieldProvider = context
         .read<ChatInputProvider>();
-    final VoiceMessageProvider voiceMessageProvider = context
-        .read<VoiceMessageProvider>();
+    final VoiceRecorderProvider voiceRecorderProvider = context
+        .read<VoiceRecorderProvider>();
 
     // If there isn't any text, start recording.
     if (messageFieldProvider.isTextFieldEmpty) {
       try {
-        voiceMessageProvider.startRecording(
+        voiceRecorderProvider.startRecording(
           callOnPermissionDenied: () {
             openPermissionDeniedDialog(context);
           },
@@ -68,24 +68,24 @@ class MessageFieldButton extends StatelessWidget {
 
   void onLongPressUp(BuildContext context) {
     // Access provider
-    final VoiceMessageProvider voiceMessageProvider = context
-        .read<VoiceMessageProvider>();
+    final VoiceRecorderProvider voiceRecorderProvider = context
+        .read<VoiceRecorderProvider>();
 
     // Stop recording
-    voiceMessageProvider.stopRecording();
+    voiceRecorderProvider.stopRecording();
   }
 
   @override
   Widget build(BuildContext context) {
-    final VoiceMessageProvider voiceMessageProvider = context
-        .watch<VoiceMessageProvider>();
+    final VoiceRecorderProvider voiceRecorderProvider = context
+        .watch<VoiceRecorderProvider>();
 
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
 
     return SizedBox.square(
       dimension: 50,
       child: AnimatedScale(
-        scale: voiceMessageProvider.isRecording ? 2 : 1.0,
+        scale: voiceRecorderProvider.isRecording ? 2 : 1.0,
         duration: const Duration(milliseconds: 150),
         child: Material(
           borderRadius: BorderRadius.circular(25),
@@ -93,7 +93,7 @@ class MessageFieldButton extends StatelessWidget {
           child: GestureDetector(
             onLongPressStart: (_) => onLongPress(context),
             onLongPressMoveUpdate: (details) {
-              voiceMessageProvider.updateDragOffset(details.localPosition.dx);
+              voiceRecorderProvider.updateDragOffset(details.localPosition.dx);
             },
             onLongPressEnd: (_) => onLongPressUp(context),
             
