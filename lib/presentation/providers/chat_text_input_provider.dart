@@ -3,7 +3,7 @@ import 'package:yes_no_app/domain/domain.dart';
 
 typedef OnSendTextMessage = Function(TextMessage);
 
-class ChatInputProvider extends ChangeNotifier {
+class ChatTextInputProvider extends ChangeNotifier {
   // Text controller and node.
   final TextEditingController textController = TextEditingController();
   final FocusNode focusNode = FocusNode();
@@ -14,7 +14,7 @@ class ChatInputProvider extends ChangeNotifier {
 
   final OnSendTextMessage onSendTextMessage;
 
-  ChatInputProvider(this.onSendTextMessage) {
+  ChatTextInputProvider(this.onSendTextMessage) {
     textController.addListener(() {
       final bool isTextFieldActuallyEmpty = textController.text.trim().isEmpty;
       if (isTextFieldActuallyEmpty != _isTextFieldEmpty) {

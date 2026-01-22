@@ -11,8 +11,8 @@ import 'package:yes_no_app/infrastructure/services/services.dart';
 typedef OnPermissionDeniedCallback = void Function();
 typedef OnSendVoiceMessage = void Function(VoiceMessage message);
 
-class VoiceRecorderProvider extends ChangeNotifier {
-  VoiceRecorderProvider(this.onSendVoiceMessage);
+class ChatVoiceRecorderProvider extends ChangeNotifier {
+  ChatVoiceRecorderProvider(this.onSendVoiceMessage);
 
   // Required functions
   final OnSendVoiceMessage onSendVoiceMessage;

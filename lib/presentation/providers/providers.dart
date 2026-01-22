@@ -1,3 +1,3 @@
 export 'chat_provider.dart';
-export 'chat_input_provider.dart';
-export 'voice_message_provider.dart';
+export 'chat_text_input_provider.dart';
+export 'chat_voice_recorder_provider.dart';

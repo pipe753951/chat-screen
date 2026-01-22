@@ -9,8 +9,8 @@ class MessageFieldBox extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final VoiceRecorderProvider voiceRecorderProvider = context
-        .watch<VoiceRecorderProvider>();
+    final ChatVoiceRecorderProvider chatVoiceRecorderProvider = context
+        .watch<ChatVoiceRecorderProvider>();
 
     // App color scheme
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
@@ -33,7 +33,7 @@ class MessageFieldBox extends StatelessWidget {
             return FadeTransition(opacity: animation, child: child);
           },
           // Field content (text field / recording status)
-          child: voiceRecorderProvider.isRecording
+          child: chatVoiceRecorderProvider.isRecording
               ? VoiceMessageRecordingStatus()
               : TextMessageField(),
         ),

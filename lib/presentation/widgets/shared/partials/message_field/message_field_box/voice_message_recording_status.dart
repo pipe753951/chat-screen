@@ -39,8 +39,8 @@ class _VoiceMessageRecordingStatusState
 
   @override
   Widget build(BuildContext context) {
-    final VoiceRecorderProvider voiceRecorderProvider = context
-        .watch<VoiceRecorderProvider>();
+    final ChatVoiceRecorderProvider chatVoiceRecorderProvider = context
+        .watch<ChatVoiceRecorderProvider>();
 
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
 
@@ -56,7 +56,7 @@ class _VoiceMessageRecordingStatusState
               child: Icon(Icons.mic_rounded, color: colorScheme.primary),
             ),
           ),
-          Text(voiceRecorderProvider.recordDurationFormatted, style: TextStyle(fontSize: 20)),
+          Text(chatVoiceRecorderProvider.recordDurationFormatted, style: TextStyle(fontSize: 20)),
           Expanded(
             child: Row(
               mainAxisAlignment: MainAxisAlignment.end,

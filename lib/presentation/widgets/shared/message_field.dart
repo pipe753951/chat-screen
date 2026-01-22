@@ -19,10 +19,10 @@ class MessageField extends StatelessWidget {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(
-          create: (_) => ChatInputProvider(onSendTextMessage),
+          create: (_) => ChatTextInputProvider(onSendTextMessage),
         ),
         ChangeNotifierProvider(
-          create: (_) => VoiceRecorderProvider(onSendVoiceMessage),
+          create: (_) => ChatVoiceRecorderProvider(onSendVoiceMessage),
         ),
       ],
       child: _MessageFieldLayout(),
@@ -35,7 +35,7 @@ class _MessageFieldLayout extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final VoiceRecorderProvider voiceRecorderProvider = context.watch();
+    final ChatVoiceRecorderProvider chatVoiceRecorderProvider = context.watch();
 
     return Padding(
       padding: const EdgeInsetsGeometry.symmetric(vertical: 8),
@@ -48,7 +48,7 @@ class _MessageFieldLayout extends StatelessWidget {
             ],
           ),
           Positioned(
-            right: -voiceRecorderProvider.dragOffset,
+            right: -chatVoiceRecorderProvider.dragOffset,
             child: MessageFieldButton(),
           ),
         ],

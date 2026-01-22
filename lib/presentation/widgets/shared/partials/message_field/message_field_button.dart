@@ -35,27 +35,27 @@ class MessageFieldButton extends StatelessWidget {
   }
 
   void onTap(BuildContext context) {
-    final ChatInputProvider messageFieldProvider = context
-        .read<ChatInputProvider>();
+    final ChatTextInputProvider chatTextInputProvider = context
+        .read<ChatTextInputProvider>();
 
     // If there is any text, send message
-    if (!messageFieldProvider.isTextFieldEmpty) {
-      final String textFormFieldText = messageFieldProvider.textController.text;
-      messageFieldProvider.onFieldSubmitted(textFormFieldText);
+    if (!chatTextInputProvider.isTextFieldEmpty) {
+      final String textFormFieldText = chatTextInputProvider.textController.text;
+      chatTextInputProvider.onFieldSubmitted(textFormFieldText);
     }
     // TODO: Start recording by tap button
   }
 
   void onLongPress(BuildContext context) {
-    final ChatInputProvider messageFieldProvider = context
-        .read<ChatInputProvider>();
-    final VoiceRecorderProvider voiceRecorderProvider = context
-        .read<VoiceRecorderProvider>();
+    final ChatTextInputProvider chatTextInputProvider = context
+        .read<ChatTextInputProvider>();
+    final ChatVoiceRecorderProvider chatVoiceRecorderProvider = context
+        .read<ChatVoiceRecorderProvider>();
 
     // If there isn't any text, start recording.
-    if (messageFieldProvider.isTextFieldEmpty) {
+    if (chatTextInputProvider.isTextFieldEmpty) {
       try {
-        voiceRecorderProvider.startRecording(
+        chatVoiceRecorderProvider.startRecording(
           callOnPermissionDenied: () {
             openPermissionDeniedDialog(context);
           },
@@ -68,24 +68,24 @@ class MessageFieldButton extends StatelessWidget {
 
   void onLongPressUp(BuildContext context) {
     // Access provider
-    final VoiceRecorderProvider voiceRecorderProvider = context
-        .read<VoiceRecorderProvider>();
+    final ChatVoiceRecorderProvider chatVoiceRecorderProvider = context
+        .read<ChatVoiceRecorderProvider>();
 
     // Stop recording
-    voiceRecorderProvider.stopRecording();
+    chatVoiceRecorderProvider.stopRecording();
   }
 
   @override
   Widget build(BuildContext context) {
-    final VoiceRecorderProvider voiceRecorderProvider = context
-        .watch<VoiceRecorderProvider>();
+    final ChatVoiceRecorderProvider chatVoiceRecorderProvider = context
+        .watch<ChatVoiceRecorderProvider>();
 
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
 
     return SizedBox.square(
       dimension: 50,
       child: AnimatedScale(
-        scale: voiceRecorderProvider.isRecording ? 2 : 1.0,
+        scale: chatVoiceRecorderProvider.isRecording ? 2 : 1.0,
         duration: const Duration(milliseconds: 150),
         child: Material(
           borderRadius: BorderRadius.circular(25),
@@ -93,7 +93,7 @@ class MessageFieldButton extends StatelessWidget {
           child: GestureDetector(
             onLongPressStart: (_) => onLongPress(context),
             onLongPressMoveUpdate: (details) {
-              voiceRecorderProvider.updateDragOffset(details.localPosition.dx);
+              chatVoiceRecorderProvider.updateDragOffset(details.localPosition.dx);
             },
             onLongPressEnd: (_) => onLongPressUp(context),
             
@@ -116,8 +116,8 @@ class _MessageButtonIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ChatInputProvider messageFieldProvider = context
-        .watch<ChatInputProvider>();
+    final ChatTextInputProvider chatTextInputProvider = context
+        .watch<ChatTextInputProvider>();
 
     return AnimatedSwitcher(
       duration: const Duration(milliseconds: 150),
@@ -127,7 +127,7 @@ class _MessageButtonIcon extends StatelessWidget {
           child: FadeTransition(opacity: animation, child: child),
         );
       },
-      child: messageFieldProvider.isTextFieldEmpty
+      child: chatTextInputProvider.isTextFieldEmpty
           ? Icon(
               Icons.mic_rounded,
               key: ValueKey('mic_icon'),

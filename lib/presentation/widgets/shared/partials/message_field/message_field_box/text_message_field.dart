@@ -8,8 +8,8 @@ class TextMessageField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ChatInputProvider messageFieldProvider = context
-        .watch<ChatInputProvider>();
+    final ChatTextInputProvider chatTextInputProvider = context
+        .watch<ChatTextInputProvider>();
 
     final UnderlineInputBorder outlineInputBorder = UnderlineInputBorder(
       borderSide: const BorderSide(color: Colors.transparent),
@@ -24,11 +24,11 @@ class TextMessageField extends StatelessWidget {
     );
 
     return TextFormField(
-      focusNode: messageFieldProvider.focusNode,
-      controller: messageFieldProvider.textController,
+      focusNode: chatTextInputProvider.focusNode,
+      controller: chatTextInputProvider.textController,
       decoration: inputDecoration,
       onFieldSubmitted: (value) {
-        messageFieldProvider.onFieldSubmitted(value);
+        chatTextInputProvider.onFieldSubmitted(value);
       },
     );
   }
